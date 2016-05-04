@@ -1,6 +1,6 @@
-package edu.cpp.iipl.deepquery.nerualnetwork;
+package edu.cpp.iipl.netquery.nerualnetwork;
 
-import edu.cpp.iipl.deepquery.Setting;
+import edu.cpp.iipl.netquery.Setting;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.linalg.dataset.DataSet;
 import org.slf4j.Logger;

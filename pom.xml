@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>edu.cpp.iipl</groupId>
-    <artifactId>deepquery</artifactId>
+    <artifactId>netquery</artifactId>
     <version>0.1</version>
     <packaging>jar</packaging>
 

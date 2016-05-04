@@ -1,9 +1,9 @@
-package edu.cpp.iipl.deepquery;
+package edu.cpp.iipl.netquery;
 
-import edu.cpp.iipl.deepquery.model.Data;
-import edu.cpp.iipl.deepquery.model.ProcessedData;
-import edu.cpp.iipl.deepquery.nerualnetwork.ParameterSearch;
-import edu.cpp.iipl.deepquery.util.DataLoader;
+import edu.cpp.iipl.netquery.model.Data;
+import edu.cpp.iipl.netquery.model.ProcessedData;
+import edu.cpp.iipl.netquery.nerualnetwork.ParameterSearch;
+import edu.cpp.iipl.netquery.util.DataLoader;
 import edu.cpp.iipl.tool.feature.Scaling;
 import edu.cpp.iipl.tool.feature.extractor.Count;
 import edu.cpp.iipl.tool.feature.extractor.Overlap;

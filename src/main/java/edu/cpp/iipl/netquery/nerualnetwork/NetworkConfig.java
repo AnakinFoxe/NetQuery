@@ -1,6 +1,6 @@
-package edu.cpp.iipl.deepquery.nerualnetwork;
+package edu.cpp.iipl.netquery.nerualnetwork;
 
-import edu.cpp.iipl.deepquery.Setting;
+import edu.cpp.iipl.netquery.Setting;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.Updater;
 

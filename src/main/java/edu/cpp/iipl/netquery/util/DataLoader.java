@@ -1,7 +1,7 @@
-package edu.cpp.iipl.deepquery.util;
+package edu.cpp.iipl.netquery.util;
 
-import edu.cpp.iipl.deepquery.Setting;
-import edu.cpp.iipl.deepquery.model.Data;
+import edu.cpp.iipl.netquery.Setting;
+import edu.cpp.iipl.netquery.model.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package edu.cpp.iipl.deepquery.nerualnetwork;
+package edu.cpp.iipl.netquery.nerualnetwork;
 
 import edu.cpp.iipl.util.Metric;
 import org.deeplearning4j.nn.api.Layer;

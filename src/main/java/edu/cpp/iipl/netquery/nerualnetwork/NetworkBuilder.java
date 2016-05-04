@@ -1,4 +1,4 @@
-package edu.cpp.iipl.deepquery.nerualnetwork;
+package edu.cpp.iipl.netquery.nerualnetwork;
 
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;

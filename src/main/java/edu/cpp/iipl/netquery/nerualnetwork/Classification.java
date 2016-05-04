@@ -1,4 +1,4 @@
-package edu.cpp.iipl.deepquery.nerualnetwork;
+package edu.cpp.iipl.netquery.nerualnetwork;
 
 /**
  * Created by xing on 4/26/16.

@@ -1,4 +1,4 @@
-package edu.cpp.iipl.deepquery;
+package edu.cpp.iipl.netquery;
 
 /**
  * Created by xing on 4/22/16.

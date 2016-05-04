@@ -1,20 +1,22 @@
-package edu.cpp.iipl.deepquery.model;
+package edu.cpp.iipl.netquery.model;
+
+import java.util.List;
 
 /**
  * Created by xing on 4/22/16.
  */
-public class Data {
+public class ProcessedData {
 
-    private String query;
-    private String title;
-    private String description;
+    private List<String> query;
+    private List<String> title;
+    private List<String> description;
     private double relevance;
     private double variance;
 
-    public Data() {
+    public ProcessedData() {
     }
 
-    public Data(String query, String title, String description, double relevance, double variance) {
+    public ProcessedData(List<String> query, List<String> title, List<String> description, double relevance, double variance) {
         this.query = query;
         this.title = title;
         this.description = description;
@@ -22,27 +24,27 @@ public class Data {
         this.variance = variance;
     }
 
-    public String getQuery() {
+    public List<String> getQuery() {
         return query;
     }
 
-    public void setQuery(String query) {
+    public void setQuery(List<String> query) {
         this.query = query;
     }
 
-    public String getTitle() {
+    public List<String> getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(List<String> title) {
         this.title = title;
     }
 
-    public String getDescription() {
+    public List<String> getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(List<String> description) {
         this.description = description;
     }
 
