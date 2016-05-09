@@ -2,7 +2,10 @@ package edu.cpp.iipl.netquery;
 
 import edu.cpp.iipl.netquery.model.Data;
 import edu.cpp.iipl.netquery.model.ProcessedData;
+import edu.cpp.iipl.netquery.nerualnetwork.Classification;
+import edu.cpp.iipl.netquery.nerualnetwork.NetworkConfig;
 import edu.cpp.iipl.netquery.nerualnetwork.ParameterSearch;
+import edu.cpp.iipl.netquery.nerualnetwork.Regression;
 import edu.cpp.iipl.netquery.util.DataLoader;
 import edu.cpp.iipl.tool.feature.Scaling;
 import edu.cpp.iipl.tool.feature.extractor.Count;
@@ -16,16 +19,14 @@ import org.canova.api.records.reader.RecordReader;
 import org.canova.api.records.reader.impl.CSVRecordReader;
 import org.canova.api.split.FileSplit;
 import org.deeplearning4j.datasets.canova.RecordReaderDataSetIterator;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.SplitTestAndTrain;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -232,8 +233,104 @@ public class Routine {
 
     }
 
+    private static NetworkConfig buildNetworkConfigFromFile(String path)
+            throws IOException {
+        // read config file
+        BufferedReader br = new BufferedReader(new FileReader(path));
+        List<String> settings = new ArrayList<>();
+        String line;
+        while ((line = br.readLine()) != null) {
+            String[] items = line.trim().split("=");
+            settings.add(items[1]);
+        }
+        br.close();
+
+        // build network config
+        int idx = 0;
+        NetworkConfig nc = new NetworkConfig();
+        nc.type = NetworkConfig.NetworkType.valueOf(settings.get(idx++));
+        nc.seed = Integer.parseInt(settings.get(idx++));
+        nc.learningRate = Double.parseDouble(settings.get(idx++));
+        nc.inNum = Setting.FEATURE_NUM;
+        nc.outNum = Integer.parseInt(settings.get(idx++));
+        nc.useRegularization = Boolean.parseBoolean(settings.get(idx++));
+        nc.l1 = Double.parseDouble(settings.get(idx++));
+        nc.l2 = Double.parseDouble(settings.get(idx++));
+        nc.numOfNodesInLayer1 = Integer.parseInt(settings.get(idx++));
+        nc.numOfNodesInLayer2 = Integer.parseInt(settings.get(idx++));
+        nc.numOfNodesInLayer3 = Integer.parseInt(settings.get(idx++));
+        nc.numOfNodesInLayer4 = Integer.parseInt(settings.get(idx++));
+        nc.afInLayer0 = settings.get(idx).equals("null") ? null : settings.get(idx); ++idx;
+        nc.afInLayer1 = settings.get(idx).equals("null") ? null : settings.get(idx); ++idx;
+        nc.afInLayer2 = settings.get(idx).equals("null") ? null : settings.get(idx); ++idx;
+        nc.afInLayer3 = settings.get(idx).equals("null") ? null : settings.get(idx); ++idx;
+        nc.afInOutput = settings.get(idx).equals("null") ? null : settings.get(idx);
+
+        return nc;
+    }
+
+
+    private static void runSpecificModel(String[] args, final DataSet train, final DataSet test)
+            throws IOException {
+        if (args.length != 3) {
+            LOG.error("Invalid arguments {}", args);
+            return;
+        }
+
+        String type = args[0];
+        int iteration = Integer.parseInt(args[1]);
+        String path = args[2];
+
+        NetworkConfig nc = buildNetworkConfigFromFile(path);
+
+        double ret = 0;
+
+        if (type.equals("classification")) {
+            Classification nn = new Classification(Setting.NUMERICAL_STABILITY, train, test);
+
+            MultiLayerNetwork net = nn.trainModel(nc, iteration);
+
+            ret = nn.testModel(net);
+
+            System.out.println("Kappa of the spefici model: " + ret);
+        } else if (type.equals("regression")) {
+            Regression nn = new Regression(Setting.NUMERICAL_STABILITY, train, test);
+
+            MultiLayerNetwork net = nn.trainModel(nc, iteration);
+
+            ret = nn.testModel(net);
+
+            System.out.println("MSE of the specific model: " + ret);
+        } else
+            LOG.error("Type {} not supported", type);
+    }
+
 
     public static void main(String[] args) throws IOException {
+        if (args == null || (args.length != 0 && args.length != 3)) {
+            LOG.error("Format:");
+            LOG.error("  1) no argument: run parameter search");
+            LOG.error("  2) [file] [type]");
+            LOG.error("     [file]: file of network config");
+            LOG.error("     [type]: model type");
+            return;
+        }
+
+        if (args.length == 3 && (!args[0].equals("classification") && !args[0].equals("regression"))) {
+            LOG.error("Model type should be either classification or regression");
+            return;
+        }
+
+        if (args.length == 3) {
+            try {
+                int iteration = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                LOG.error("Invalid input for iteration");
+                LOG.error("", e);
+                return;
+            }
+        }
+
         // load data set
         List<Data> allData = loadData();
 
@@ -261,8 +358,14 @@ public class Routine {
                 Setting.FEATURE_NUM,
                 Setting.SPLIT_RATIO);
 
-        // parameter search to find the best model
-        ParameterSearch.RegressionSearch(train, test);
+        // default: parameter search
+        // other wise: train and test a specific model
+        if (args.length == 0)
+            // parameter search to find the best model
+            ParameterSearch.RegressionSearch(train, test);
+        else
+            runSpecificModel(args, train, test);
+
 
     }
 }

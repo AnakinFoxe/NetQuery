@@ -78,6 +78,8 @@ public class DataLoader {
             allData.get(idx++).setDescription(line.trim());
         }
 
+        int[] cnt = new int[4];
+
         // load relevance
         idx = 0;
         br = new BufferedReader(new FileReader(Setting.DATASET_RELEVANCE));
@@ -96,9 +98,25 @@ public class DataLoader {
             allData.get(idx).setRelevance(relevance);
             allData.get(idx).setVariance(variance);
             ++idx;
+
+
+            ++cnt[roundUp(relevance) - 1];
         }
+
+        System.out.println(cnt[0] + ", " + cnt[1] + ", " + cnt[2] + ", " + cnt[3]);
 
         LOG.info("Data set loading accomplished.");
 
+    }
+
+    public static int roundUp(double num) {
+        if (num < 1.5)
+            return 1;
+        else if (num >= 1.5 && num < 2.5)
+            return 2;
+        else if (num >= 2.5 && num < 3.5)
+            return 3;
+        else
+            return 4;
     }
 }

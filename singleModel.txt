@@ -1,0 +1,16 @@
+Type=DENSE_2_HIDDEN_LAYER
+Seed=55
+LearningRate=0.5
+OutNum=1
+UseRegularization=true
+l1=1e-6
+l2=1e-4
+NumOfNodesInLayer1=100
+NumOfNodesInLayer2=100
+NumOfNodesInLayer3=0
+NumOfNodesInLayer4=0
+ActivationFunctionInLayer0=relu
+ActivationFunctionInLayer1=softmax
+ActivationFunctionInLayer2=null
+ActivationFunctionInLayer3=null
+ActivationFunctionOutLayer=relu
