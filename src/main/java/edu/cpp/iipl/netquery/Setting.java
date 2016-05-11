@@ -22,6 +22,8 @@ public class Setting {
     public static boolean INCLUDE_FEAT_COUNT            = true;
     public static boolean INCLUDE_FEAT_OVERLAP          = true;
     public static boolean INCLUDE_FEAT_TFIDF            = true;
+    public static boolean INCLUDE_FEAT_WITH_BIGRAM      = true; // not very beneficial
+    public static boolean INCLUDE_FEAT_WITH_TRIGRAM     = true; // not very beneficial
 
 
     // feature file of the data set

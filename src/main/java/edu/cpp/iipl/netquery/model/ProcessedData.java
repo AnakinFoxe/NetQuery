@@ -7,45 +7,67 @@ import java.util.List;
  */
 public class ProcessedData {
 
-    private List<String> query;
-    private List<String> title;
-    private List<String> description;
+    // unigram form
+    private List<String> unigramQuery;
+    private List<String> unigramTitle;
+    private List<String> unigramDesc;
+
+    // bigram form
+    private List<String> bigramQuery;
+    private List<String> bigramTitle;
+    private List<String> bigramDesc;
+
+    // trigram form
+    private List<String> trigramQuery;
+    private List<String> trigramTitle;
+    private List<String> trigramDesc;
+
+
     private double relevance;
     private double variance;
 
     public ProcessedData() {
     }
 
-    public ProcessedData(List<String> query, List<String> title, List<String> description, double relevance, double variance) {
-        this.query = query;
-        this.title = title;
-        this.description = description;
+    public ProcessedData(List<String> unigramQuery, List<String> unigramTitle, List<String> unigramDesc,
+                         List<String> bigramQuery, List<String> bigramTitle, List<String> bigramDesc,
+                         List<String> trigramQuery, List<String> trigramTitle, List<String> trigramDesc,
+                         double relevance, double variance) {
+        this.unigramQuery = unigramQuery;
+        this.unigramTitle = unigramTitle;
+        this.unigramDesc = unigramDesc;
+        this.bigramQuery = bigramQuery;
+        this.bigramTitle = bigramTitle;
+        this.bigramDesc = bigramDesc;
+        this.trigramQuery = trigramQuery;
+        this.trigramTitle = trigramTitle;
+        this.trigramDesc = trigramDesc;
         this.relevance = relevance;
         this.variance = variance;
     }
 
-    public List<String> getQuery() {
-        return query;
+    public List<String> getUnigramQuery() {
+        return unigramQuery;
     }
 
-    public void setQuery(List<String> query) {
-        this.query = query;
+    public void setUnigramQuery(List<String> unigramQuery) {
+        this.unigramQuery = unigramQuery;
     }
 
-    public List<String> getTitle() {
-        return title;
+    public List<String> getUnigramTitle() {
+        return unigramTitle;
     }
 
-    public void setTitle(List<String> title) {
-        this.title = title;
+    public void setUnigramTitle(List<String> unigramTitle) {
+        this.unigramTitle = unigramTitle;
     }
 
-    public List<String> getDescription() {
-        return description;
+    public List<String> getUnigramDesc() {
+        return unigramDesc;
     }
 
-    public void setDescription(List<String> description) {
-        this.description = description;
+    public void setUnigramDesc(List<String> unigramDesc) {
+        this.unigramDesc = unigramDesc;
     }
 
     public double getRelevance() {
@@ -62,5 +84,53 @@ public class ProcessedData {
 
     public void setVariance(double variance) {
         this.variance = variance;
+    }
+
+    public List<String> getBigramQuery() {
+        return bigramQuery;
+    }
+
+    public void setBigramQuery(List<String> bigramQuery) {
+        this.bigramQuery = bigramQuery;
+    }
+
+    public List<String> getBigramTitle() {
+        return bigramTitle;
+    }
+
+    public void setBigramTitle(List<String> bigramTitle) {
+        this.bigramTitle = bigramTitle;
+    }
+
+    public List<String> getBigramDesc() {
+        return bigramDesc;
+    }
+
+    public void setBigramDesc(List<String> bigramDesc) {
+        this.bigramDesc = bigramDesc;
+    }
+
+    public List<String> getTrigramQuery() {
+        return trigramQuery;
+    }
+
+    public void setTrigramQuery(List<String> trigramQuery) {
+        this.trigramQuery = trigramQuery;
+    }
+
+    public List<String> getTrigramTitle() {
+        return trigramTitle;
+    }
+
+    public void setTrigramTitle(List<String> trigramTitle) {
+        this.trigramTitle = trigramTitle;
+    }
+
+    public List<String> getTrigramDesc() {
+        return trigramDesc;
+    }
+
+    public void setTrigramDesc(List<String> trigramDesc) {
+        this.trigramDesc = trigramDesc;
     }
 }

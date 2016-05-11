@@ -98,7 +98,7 @@ public class NetworkConfig {
         for (double learningRate : Setting.COMMON_LEARNING_RATES)
             for (boolean reg : Setting.COMMON_REGS)
                 for (int nNodes1 : Setting.COMMON_NUM_OF_NODES)
-                    for (String af0 : Setting.COMMON_AFS)
+//                    for (String af0 : Setting.COMMON_AFS)
                         for (String afOut : Setting.COMMON_AFS_OUTPUT) {
                             NetworkConfig nc = new NetworkConfig();
 
@@ -109,7 +109,7 @@ public class NetworkConfig {
                             nc.outNum = outNum;
                             nc.useRegularization = reg;
                             nc.numOfNodesInLayer1 = nNodes1;
-                            nc.afInLayer0 = af0;
+                            nc.afInLayer0 = "relu"; // based on observation relu works the best for 1st layer
                             nc.afInOutput = afOut;
 
                             configs.add(nc);

@@ -7,13 +7,9 @@ import edu.cpp.iipl.netquery.nerualnetwork.NetworkConfig;
 import edu.cpp.iipl.netquery.nerualnetwork.ParameterSearch;
 import edu.cpp.iipl.netquery.nerualnetwork.Regression;
 import edu.cpp.iipl.netquery.util.DataLoader;
+import edu.cpp.iipl.netquery.util.FeatureExtractor;
+import edu.cpp.iipl.netquery.util.Preprocessor;
 import edu.cpp.iipl.tool.feature.Scaling;
-import edu.cpp.iipl.tool.feature.extractor.Count;
-import edu.cpp.iipl.tool.feature.extractor.Overlap;
-import edu.cpp.iipl.tool.preprocessor.SpellCorrector;
-import edu.cpp.iipl.tool.preprocessor.Stemmer;
-import edu.cpp.iipl.tool.preprocessor.Stopword;
-import edu.cpp.iipl.tool.preprocessor.TextFormatter;
 import org.canova.api.io.converters.SelfWritableConverter;
 import org.canova.api.records.reader.RecordReader;
 import org.canova.api.records.reader.impl.CSVRecordReader;
@@ -27,7 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Created by xing on 4/21/16.
@@ -47,128 +45,13 @@ public class Routine {
     }
 
     private static List<ProcessedData> preprocess(List<Data> allData) {
-        List<ProcessedData> processedDataList = new ArrayList<>();
-
-        // init text formatter
-        Properties props = new Properties();
-        props.put("remove", Setting.TF_REMOVE);
-        props.put("format", Setting.TF_FORMAT);
-        TextFormatter tf = new TextFormatter(props);
-
-        // init spell corrector
-        SpellCorrector sc = new SpellCorrector();
-
-        // init stopwords removal
-        Stopword sw = new Stopword("en");
-
-        // init stemmer
-        Stemmer st = new Stemmer("en");
-
-        for (Data data : allData) {
-            // format text
-            String query = tf.format(data.getQuery());
-            String title = tf.format(data.getTitle());
-            String description = tf.format(data.getDescription());
-
-            // convert into words
-            List<String> procQuery = Arrays.asList(query.split(" "));
-            List<String> procTitle = Arrays.asList(title.split(" "));
-            List<String> procDescription = Arrays.asList(description.split(" "));
-
-            // correct misspells
-            procQuery = sc.correct(procQuery);
-            procTitle = sc.correct(procTitle);
-            procDescription = sc.correct(procDescription);
-
-            // remove stopwords
-            procQuery = sw.rmStopword(procQuery);
-            procTitle = sw.rmStopword(procTitle);
-            procDescription = sw.rmStopword(procDescription);
-
-            // stemming
-            procQuery = st.stemWords(procQuery);
-            procTitle = st.stemWords(procTitle);
-            procDescription = st.stemWords(procDescription);
-
-            processedDataList.add(new ProcessedData(
-                    procQuery, procTitle, procDescription,
-                    data.getRelevance(), data.getVariance()));
-        }
-
-        LOG.warn("Preprocessing accomplished.");
-
-        return processedDataList;
+        return Preprocessor.preprocess(allData);
     }
 
-
     private static List<List<Double>> extractFeatures(List<ProcessedData> allData) {
-        List<List<Double>> features = new ArrayList<>();
+        FeatureExtractor extractor = new FeatureExtractor();
 
-        if (allData == null || allData.size() == 0)
-            return features;
-
-        for (ProcessedData data : allData) {
-            List<String> query = data.getQuery();
-            List<String> title = data.getTitle();
-            List<String> description = data.getDescription();
-
-            List<Double> feature = new ArrayList<>();
-
-            // counting based features
-            if (Setting.INCLUDE_FEAT_COUNT) {
-                feature.add((double) Count.numOfWords(query));
-                feature.add((double) Count.numOfWords(title));
-                feature.add((double) Count.numOfWords(description));
-            }
-
-            // overlapping based features
-            if (Setting.INCLUDE_FEAT_OVERLAP) {
-                // complete query in title/description (overlap1)
-                int numOfQueryInTitle = Overlap.numOfStr1InStr2(query, title);
-                int numOfQueryInDescription = Overlap.numOfStr1InStr2(query, description);
-
-                // last word of query in title/description (overlap2)
-                int numOfLastWordQueryInTitle = 0;
-                int numOfLastWordQueryInDescription = 0;
-                if (query.size() > 0) {
-                    String lastWord = query.get(query.size() - 1);
-                    numOfLastWordQueryInTitle = Overlap.numOfWordInWords(lastWord, title);
-                    numOfLastWordQueryInDescription = Overlap.numOfWordInWords(lastWord, description);
-                }
-
-                // all the words of query in title/description (overlap3)
-                int numOfWordsQueryInTitle = Overlap.numOfWords1InWords2(query, title);
-                int numOfWordsQueryInDescription = Overlap.numOfWords1InWords2(query, description);
-
-                // ratio of (overlap3 / length of title/description)
-                double ratioOfTitle = 0;
-                double ratioOfDescription = 0;
-                if (title.size() > 0)
-                    ratioOfTitle = (double) numOfWordsQueryInTitle / title.size();
-                if (description.size() > 0)
-                    ratioOfDescription = (double) numOfQueryInDescription / description.size();
-
-                feature.add((double) numOfQueryInTitle);
-                feature.add((double) numOfQueryInDescription);
-                feature.add((double) numOfLastWordQueryInTitle);
-                feature.add((double) numOfLastWordQueryInDescription);
-                feature.add((double) numOfWordsQueryInTitle);
-                feature.add((double) numOfWordsQueryInDescription);
-                feature.add(ratioOfTitle);
-                feature.add(ratioOfDescription);
-            }
-
-            // tf-idf based features
-            if (Setting.INCLUDE_FEAT_TFIDF) {
-
-            }
-
-            features.add(feature);
-        }
-
-        LOG.warn("Feature extraction accomplished.");
-
-        return features;
+        return extractor.extractFeatures(allData);
     }
 
 
