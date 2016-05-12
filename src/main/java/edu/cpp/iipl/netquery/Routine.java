@@ -10,6 +10,7 @@ import edu.cpp.iipl.netquery.util.DataLoader;
 import edu.cpp.iipl.netquery.util.FeatureExtractor;
 import edu.cpp.iipl.netquery.util.Preprocessor;
 import edu.cpp.iipl.tool.feature.Scaling;
+import edu.cpp.iipl.util.MapUtil;
 import org.canova.api.io.converters.SelfWritableConverter;
 import org.canova.api.records.reader.RecordReader;
 import org.canova.api.records.reader.impl.CSVRecordReader;
@@ -23,9 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by xing on 4/21/16.
@@ -48,7 +47,8 @@ public class Routine {
         return Preprocessor.preprocess(allData);
     }
 
-    private static List<List<Double>> extractFeatures(List<ProcessedData> allData) {
+    private static List<List<Double>> extractFeatures(List<ProcessedData> allData)
+            throws IOException {
         FeatureExtractor extractor = new FeatureExtractor();
 
         return extractor.extractFeatures(allData);
@@ -156,7 +156,7 @@ public class Routine {
     private static void runSpecificModel(String[] args, final DataSet train, final DataSet test)
             throws IOException {
         if (args.length != 3) {
-            LOG.error("Invalid arguments {}", args);
+            LOG.error("Invalid arguments");
             return;
         }
 
@@ -166,7 +166,7 @@ public class Routine {
 
         NetworkConfig nc = buildNetworkConfigFromFile(path);
 
-        double ret = 0;
+        double ret;
 
         if (type.equals("classification")) {
             Classification nn = new Classification(Setting.NUMERICAL_STABILITY, train, test);
@@ -186,6 +186,44 @@ public class Routine {
             System.out.println("MSE of the specific model: " + ret);
         } else
             LOG.error("Type {} not supported", type);
+    }
+
+    public static void prepareTextForWord2Vec(List<ProcessedData> allData)
+            throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter(Setting.CORPUS_CROWDFLOWER));
+
+        Map<String, Integer> wordCount = new HashMap<>();
+
+        // convert to word2vec input text
+        for (ProcessedData data : allData) {
+            StringBuilder sb = new StringBuilder();
+
+            for (String word : data.getUnigramTitle()) {
+                sb.append(word).append(" ");
+
+                MapUtil.updateMap(wordCount, word);
+            }
+
+            for (String word : data.getUnigramDesc()) {
+                sb.append(word).append(" ");
+
+                MapUtil.updateMap(wordCount, word);
+            }
+
+            bw.write(sb.toString());
+        }
+
+        // sort word count map
+        int top = 1;
+        Map<String, Integer> sorted = MapUtil.sortByValue(wordCount);
+        for (String word : sorted.keySet()) {
+            LOG.warn("top {} word in corpus {} = {}", top, word, sorted.get(word));
+
+            if (++top > 10)
+                break;
+        }
+
+        bw.close();
     }
 
 
@@ -219,6 +257,8 @@ public class Routine {
 
         // text pre-processing
         List<ProcessedData> procAllData = preprocess(allData);
+
+        prepareTextForWord2Vec(procAllData);
 
         // feature extraction
         List<List<Double>> features = extractFeatures(procAllData);

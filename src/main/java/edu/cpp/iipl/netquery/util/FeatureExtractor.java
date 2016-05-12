@@ -5,9 +5,11 @@ import edu.cpp.iipl.netquery.model.ProcessedData;
 import edu.cpp.iipl.tool.feature.extractor.Count;
 import edu.cpp.iipl.tool.feature.extractor.Overlap;
 import edu.cpp.iipl.tool.feature.extractor.TfIdf;
+import edu.cpp.iipl.util.Word2Vec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -17,18 +19,27 @@ public class FeatureExtractor {
 
     private static final Logger LOG = LoggerFactory.getLogger(FeatureExtractor.class);
 
-//    private TfIdf tfIdfQuery;
+    private Word2Vec word2Vec;
+
     private TfIdf tfIdfTitle;
     private TfIdf tfIdfDescription;
 
-    public List<List<Double>> extractFeatures(List<ProcessedData> allData) {
+    public List<List<Double>> extractFeatures(List<ProcessedData> allData)
+            throws IOException {
         List<List<Double>> features = new ArrayList<>();
 
         if (allData == null || allData.size() == 0)
             return features;
 
+        // prepare for word2vec feature extraction
+        if (Setting.INCLUDE_FEAT_WORD2VEC) {
+            word2Vec = new Word2Vec();
+            word2Vec.readVectors(Setting.WORD2VEC_VECTORS);
+        }
+
         // prepare for tf-idf feature extraction
-        prepareTfIdf(allData);
+        if (Setting.INCLUDE_FEAT_TFIDF)
+            prepareTfIdf(allData);
 
         // extract features
         for (ProcessedData data : allData) {
@@ -46,6 +57,9 @@ public class FeatureExtractor {
             if (Setting.INCLUDE_FEAT_TFIDF)
                 addFeatTfIdf(allData.indexOf(data), data, feature);
 
+            // word2vec based features
+            if (Setting.INCLUDE_FEAT_WORD2VEC)
+                addFeatWord2Vec(data, feature);
 
             features.add(feature);
         }
@@ -204,5 +218,67 @@ public class FeatureExtractor {
         feature.add(cosineQnT);
         feature.add(cosineQnD);
         feature.add(cosineTnD);
+    }
+
+
+    private Double[] averageVec(List<String> tokens) {
+        Double[] averaged = new Double[word2Vec.getNumOfVectors()];
+        for (int i = 0; i < averaged.length; ++i)
+            averaged[i] = 0.0;
+
+
+        int numOfVec = 0;
+        for (String token : tokens) {
+            double[] vec = word2Vec.getVectors(token);
+
+            if (vec != null) {
+                for (int i = 0; i < averaged.length; ++i) {
+                    averaged[i] += vec[i];
+                    ++numOfVec;
+                }
+            }
+        }
+
+        if (numOfVec != 0)
+            for (int i = 0; i < averaged.length; ++i)
+                averaged[i] /= numOfVec;
+
+        return averaged;
+    }
+
+    private double cosine(Double[] vec1, Double[] vec2) {
+        double cosine = 0;
+
+        for (int i = 0; i < vec1.length; ++i)
+            cosine += vec1[i] * vec2[i];
+
+        return cosine;
+    }
+
+    private void addFeatWord2Vec(ProcessedData data, List<Double> feature) {
+        List<String> query = data.getUnigramQuery();
+        List<String> title = data.getUnigramTitle();
+        List<String> description = data.getUnigramDesc();
+
+        // average vec for query, title & description
+        Double[] averagedQuery = averageVec(query);
+        Double[] averagedTitle = averageVec(title);
+        Double[] averagedDesc = averageVec(description);
+
+        // cosine similarity of query vs title based on word2vec
+        double cosineQvT = cosine(averagedQuery, averagedTitle);
+
+        // cosine similarity of query vs description based on word2vec
+        double cosineQvD = cosine(averagedQuery, averagedDesc);
+
+        // cosine similarity of title vs description based on word2vec
+        double cosineTvD = cosine(averagedTitle, averagedDesc);
+
+        feature.addAll(Arrays.asList(averagedQuery));
+        feature.addAll(Arrays.asList(averagedTitle));
+        feature.addAll(Arrays.asList(averagedDesc));
+        feature.add(cosineQvT);
+        feature.add(cosineQvD);
+        feature.add(cosineTvD);
     }
 }

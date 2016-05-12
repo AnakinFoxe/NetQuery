@@ -54,9 +54,14 @@ public class Preprocessor {
             List<String> procDescription = Arrays.asList(description.split(" "));
 
             // correct misspells
-            procQuery = sc.correct(procQuery);
-            procTitle = sc.correct(procTitle);
-            procDescription = sc.correct(procDescription);
+//            procQuery = sc.correct(procQuery);
+//            procTitle = sc.correct(procTitle);
+//            procDescription = sc.correct(procDescription);
+
+            // remove punctuations since we don't need them in this project
+            procQuery = removePunctuation(procQuery);
+            procTitle = removePunctuation(procTitle);
+            procDescription = removePunctuation(procDescription);
 
             // stemming
             procQuery = st.stemWords(procQuery);
@@ -90,5 +95,18 @@ public class Preprocessor {
         LOG.warn("Preprocessing accomplished.");
 
         return processedDataList;
+    }
+
+    private static List<String> removePunctuation(List<String> tokens) {
+        List<String> proced = new ArrayList<>();
+
+        for (String token : tokens) {
+            if (token.replaceAll("[^a-zA-Z0-9]", "").length() == 0)
+                continue;
+
+            proced.add(token);
+        }
+
+        return proced;
     }
 }

@@ -41,9 +41,13 @@ public class Classification extends Model {
         for (int i = 0; i < labels.length; ++i)
             labels[i] = TEST.getLabels().getDouble(i);
 
+        double mse = Metric.meanSquaredError(labels, predicts);
+
+        LOG.warn("Mean Squared Error: {}", mse);
+
         double kappa = evalResult(labels, predicts);
 
-        LOG.info("Kappa: {}", kappa);
+        LOG.warn("Kappa: {}", kappa);
 
         return kappa;
     }

@@ -12,16 +12,20 @@ public class Setting {
     public static final String DATASET_RELEVANCE        = "crowdflower/relevance.csv";
     public static final int DATASET_SIZE                = 20571;
 
+    public static final String CORPUS_CROWDFLOWER       = "crowdflower/corpus.txt";
+    public static final String WORD2VEC_VECTORS         = "crowdflower/vectors.txt";
+
 
     // pre-processing settings
     public static String TF_REMOVE                      = "html_tag, html_code, url, extra_space";
-    public static String TF_FORMAT                      = "email, punctuation, unit";
+    public static String TF_FORMAT                      = "email, punctuation, unit, digit";
 
 
     // feature extraction settings
     public static boolean INCLUDE_FEAT_COUNT            = true;
     public static boolean INCLUDE_FEAT_OVERLAP          = true;
-    public static boolean INCLUDE_FEAT_TFIDF            = true;
+    public static boolean INCLUDE_FEAT_TFIDF            = false;
+    public static boolean INCLUDE_FEAT_WORD2VEC         = true;
     public static boolean INCLUDE_FEAT_WITH_BIGRAM      = true; // not very beneficial
     public static boolean INCLUDE_FEAT_WITH_TRIGRAM     = true; // not very beneficial
 
