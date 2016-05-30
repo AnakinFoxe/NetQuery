@@ -16,7 +16,11 @@ public class NetworkConfig {
         DENSE_1_HIDDEN_LAYER,
         DENSE_2_HIDDEN_LAYER,
         DENSE_3_HIDDEN_LAYER,
-        DENSE_4_HIDDEN_LAYER
+        DENSE_4_HIDDEN_LAYER,
+        DBN_1_HIDDEN_LAYER,
+        DBN_2_HIDDEN_LAYER,
+        DBN_3_HIDDEN_LAYER,
+        DBN_4_HIDDEN_LAYER
     }
 
     // keep the result of this network config
