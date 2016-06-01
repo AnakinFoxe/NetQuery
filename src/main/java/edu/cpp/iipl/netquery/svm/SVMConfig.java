@@ -36,7 +36,16 @@ public class SVMConfig {
     public int degree               = 3;
     public float[] gamma            =
             {
-                    0.5f
+                    1.0f / (1<<13),
+                    1.0f / (1<<11),
+                    1.0f / (1<<9),
+                    1.0f / (1<<7),
+                    1.0f / (1<<5),
+                    1.0f / (1<<3),
+                    0.5f,
+                    1.0f,
+                    2.0f,
+                    1<<3
             };
     public float coef0              = 0;
 
@@ -47,7 +56,17 @@ public class SVMConfig {
     public float p                  = 0.1f;     // for EPSILON_SVR
     public float[] C                =           // for C_SVC, EPSILON_SVR and NU_SVR
             {
-                    1f
+                    1.0f / (1<<5),
+                    1.0f / (1<<3),
+                    0.5f,
+                    1f,
+                    1<<3,
+                    1<<5,
+                    1<<7,
+                    1<<9,
+                    1<<11,
+                    1<<13
+
             };
     public boolean shrinking        = true;     // use the shrinking heuristics or not
     public boolean probability      = false;    // do probability estimates or not

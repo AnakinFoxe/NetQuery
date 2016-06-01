@@ -101,19 +101,6 @@ public class Model {
         return mse;
     }
 
-    public static void runSVMModel(DataSet train, DataSet test, boolean useGridSearch) {
-        Model svm = new Model(train, test);
-
-        // prepare config
-        SVMConfig config = new SVMConfig();
-
-        // train
-        SolutionModel model = svm.trainModel(config, useGridSearch);
-
-        // test
-        svm.testModel(model);
-    }
-
     private ImmutableSvmParameterPoint setupSingleModelParam(SVMConfig config) {
         ImmutableSvmParameterPoint.Builder paramBuilder =
                 new ImmutableSvmParameterPoint.Builder();
@@ -180,6 +167,10 @@ public class Model {
                 }
 
                 paramBuilder.kernelSet.add(kernel);
+
+                // linear kernel does not need gamma
+                if (type == SVMConfig.KernelType.LINEAR)
+                    break;
             }
 
         for (float C : config.C)
@@ -194,6 +185,8 @@ public class Model {
         paramBuilder.probability = config.probability;
         paramBuilder.redistributeUnbalancedC = config.redisC;
 
+        LOG.warn("Number of kernel: {}", paramBuilder.kernelSet.size());
+        LOG.warn("Number of C: {}", paramBuilder.Cset.size());
 
         return paramBuilder.build();
     }

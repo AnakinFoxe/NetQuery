@@ -329,8 +329,5 @@ public class Routine {
             System.out.println("MSE of the specific model: " + svm.testModel(model));
         }
 
-
-        Model.runSVMModel(train, test, true);
-
     }
 }
