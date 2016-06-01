@@ -19,6 +19,24 @@
         <canova.version>0.0.0.14</canova.version>
     </properties>
 
+    <repositories>
+        <!-- for jLibSVM -->
+        <repository>
+            <id>dev.davidsoergel.com releases</id>
+            <url>http://dev.davidsoergel.com/nexus/content/repositories/releases</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>dev.davidsoergel.com snapshots</id>
+            <url>http://dev.davidsoergel.com/nexus/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
 
     <dependencies>
         <!-- CPP NLP Library -->
@@ -36,6 +54,7 @@
         </dependency>
 
         <!--deeplearnig4j library-->
+        <!-- https://github.com/deeplearning4j/deeplearning4j -->
         <dependency>
             <groupId>org.deeplearning4j</groupId>
             <artifactId>deeplearning4j-core</artifactId>
@@ -51,6 +70,15 @@
             <groupId>org.nd4j</groupId>
             <version>${canova.version}</version>
         </dependency>
+
+        <!-- jLibSVM library -->
+        <!-- https://github.com/davidsoergel/jlibsvm/ -->
+        <dependency>
+            <groupId>edu.berkeley.compbio</groupId>
+            <artifactId>jlibsvm</artifactId>
+            <version>0.911</version>
+        </dependency>
+
     </dependencies>
 
 </project>

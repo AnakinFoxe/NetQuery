@@ -12,6 +12,9 @@ public class Setting {
     public static final String DATASET_RELEVANCE        = "crowdflower/relevance.csv";
     public static final int DATASET_SIZE                = 20571;
 
+    public static final String DATASET_TRAIN            = "crowdflower/dataset_train";
+    public static final String DATASET_TEST             = "crowdflower/dataset_test";
+
     public static final String CORPUS_CROWDFLOWER       = "crowdflower/corpus.txt";
     public static final String WORD2VEC_VECTORS         = "crowdflower/vectors.txt";
 

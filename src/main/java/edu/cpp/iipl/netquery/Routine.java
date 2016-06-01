@@ -1,11 +1,14 @@
 package edu.cpp.iipl.netquery;
 
+import edu.berkeley.compbio.jlibsvm.SolutionModel;
 import edu.cpp.iipl.netquery.model.Data;
 import edu.cpp.iipl.netquery.model.ProcessedData;
 import edu.cpp.iipl.netquery.nerualnetwork.Classification;
 import edu.cpp.iipl.netquery.nerualnetwork.NetworkConfig;
 import edu.cpp.iipl.netquery.nerualnetwork.ParameterSearch;
 import edu.cpp.iipl.netquery.nerualnetwork.Regression;
+import edu.cpp.iipl.netquery.svm.Model;
+import edu.cpp.iipl.netquery.svm.SVMConfig;
 import edu.cpp.iipl.netquery.util.DataLoader;
 import edu.cpp.iipl.netquery.util.FeatureExtractor;
 import edu.cpp.iipl.netquery.util.Preprocessor;
@@ -33,8 +36,8 @@ public class Routine {
 
     private static final Logger LOG = LoggerFactory.getLogger(Routine.class);
 
-    private static DataSet train = null;
-    private static DataSet test = null;
+    private static DataSet train = new DataSet();
+    private static DataSet test = new DataSet();
 
     private static List<Data> loadData() throws IOException {
         DataLoader loader = new DataLoader();
@@ -152,42 +155,6 @@ public class Routine {
         return nc;
     }
 
-
-    private static void runSpecificModel(String[] args, final DataSet train, final DataSet test)
-            throws IOException {
-        if (args.length != 3) {
-            LOG.error("Invalid arguments");
-            return;
-        }
-
-        String type = args[0];
-        int iteration = Integer.parseInt(args[1]);
-        String path = args[2];
-
-        NetworkConfig nc = buildNetworkConfigFromFile(path);
-
-        double ret;
-
-        if (type.equals("classification")) {
-            Classification nn = new Classification(Setting.NUMERICAL_STABILITY, train, test);
-
-            MultiLayerNetwork net = nn.trainModel(nc, iteration);
-
-            ret = nn.testModel(net);
-
-            System.out.println("Kappa of the spefici model: " + ret);
-        } else if (type.equals("regression")) {
-            Regression nn = new Regression(Setting.NUMERICAL_STABILITY, train, test);
-
-            MultiLayerNetwork net = nn.trainModel(nc, iteration);
-
-            ret = nn.testModel(net);
-
-            System.out.println("MSE of the specific model: " + ret);
-        } else
-            LOG.error("Type {} not supported", type);
-    }
-
     public static void prepareTextForWord2Vec(List<ProcessedData> allData)
             throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(Setting.CORPUS_CROWDFLOWER));
@@ -226,32 +193,7 @@ public class Routine {
         bw.close();
     }
 
-
-    public static void main(String[] args) throws IOException {
-        if (args == null || (args.length != 0 && args.length != 3)) {
-            LOG.error("Format:");
-            LOG.error("  1) no argument: run parameter search");
-            LOG.error("  2) [file] [type]");
-            LOG.error("     [file]: file of network config");
-            LOG.error("     [type]: model type");
-            return;
-        }
-
-        if (args.length == 3 && (!args[0].equals("classification") && !args[0].equals("regression"))) {
-            LOG.error("Model type should be either classification or regression");
-            return;
-        }
-
-        if (args.length == 3) {
-            try {
-                int iteration = Integer.parseInt(args[1]);
-            } catch (NumberFormatException e) {
-                LOG.error("Invalid input for iteration");
-                LOG.error("", e);
-                return;
-            }
-        }
-
+    private static void prepareDataSet() throws IOException {
         // load data set
         List<Data> allData = loadData();
 
@@ -280,15 +222,115 @@ public class Routine {
                 Setting.SAMPLE_SIZE,
                 Setting.FEATURE_NUM,
                 Setting.SPLIT_RATIO);
+    }
 
-        // default: parameter search
-        // other wise: train and test a specific model
-        if (args.length == 0)
-            // parameter search to find the best model
-            ParameterSearch.RegressionSearch(train, test);
-        else
-            runSpecificModel(args, train, test);
 
+    public static void main(String[] args) throws IOException {
+        if (args == null || (args.length < 3 || args.length > 5)) {
+            LOG.error("Format: [algo] [type] [grid] [file] [iter]");
+            LOG.error("     [algo]: nn, svm");
+            LOG.error("     [type]: type for nn: classification, regression");
+            LOG.error("             type for svm: c_svc, nu_svc, one_class, epsilon_svr, nu_svr");
+            LOG.error("     [grid]: true: use grid search");
+            LOG.error("             false: use single model");
+            LOG.error("     following only works for single model");
+            LOG.error("     [file]: single model configuration file");
+            LOG.error("     [iter]: iternation number for nn");
+
+            return;
+        }
+
+        String algo = args[0];
+        String type = args[1];
+        boolean useGridSearch = Boolean.parseBoolean(args[2]);
+        String path = useGridSearch ? "" : args[3];
+        int iteration = 0;
+        if (args.length == 5) {
+            try {
+                iteration = Integer.parseInt(args[4]);
+            } catch (NumberFormatException e) {
+                LOG.error("Invalid input for iteration");
+                LOG.error("", e);
+                return;
+            }
+        }
+
+        LOG.warn("ALGO: {}, TYPE: {}, GRID: {}, PATH: {}, ITER: {}",
+                algo, type, useGridSearch, path, iteration);
+
+        // prepare training and testing data
+        File trainFile = new File(Setting.DATASET_TRAIN);
+        File testFile = new File(Setting.DATASET_TEST);
+
+        if (trainFile.exists() && testFile.exists()) {
+            LOG.warn("loading already processed training & testing dataset...");
+            train.load(trainFile);
+            test.load(testFile);
+        } else
+            prepareDataSet();
+
+        // save data
+        train.save(new File(Setting.DATASET_TRAIN));
+        test.save(new File(Setting.DATASET_TEST));
+
+        // train and test model according to arguments
+        // neural network
+        if (algo.equals("nn")) {
+            // regression
+            if (type.equals("regression")) {
+                // parameter search (it's actually not grid search)
+                if (useGridSearch)
+                    ParameterSearch.RegressionSearch(train, test);
+                // single model
+                else {
+                    NetworkConfig nc = buildNetworkConfigFromFile(path);
+
+                    Regression nn = new Regression(Setting.NUMERICAL_STABILITY, train, test);
+
+                    MultiLayerNetwork model = nn.trainModel(nc, iteration);
+
+                    System.out.println("MSE of the specific model: " + nn.testModel(model));
+                }
+            // classification
+            } else if (type.equals("classification")) {
+                // TODO: only single model mode is supported atm
+                NetworkConfig nc = buildNetworkConfigFromFile(path);
+
+                Classification nn = new Classification(Setting.NUMERICAL_STABILITY, train, test);
+
+                MultiLayerNetwork net = nn.trainModel(nc, iteration);
+
+                System.out.println("Kappa of the spefici model: " + nn.testModel(net));
+
+            }
+        } else if (algo.equals("svm")) {
+            Model svm = new Model(train, test);
+
+            // prepare config
+            SVMConfig config = new SVMConfig();
+
+            type = type.toLowerCase();
+            if (type.equals("epsilon_svr") || type.equals("nu_svr"))
+                config.numOfClass = 0;
+            else if (type.equals("c_svc") || type.equals("nu_svc") || type.equals("one_class"))
+                config.numOfClass = 4;  // TODO: do not hardcode it
+            else {
+                LOG.error("Invalid input for SVM type {}", type);
+                return;
+            }
+
+            // set SVM type
+            config.svmType = SVMConfig.SVMType.valueOf(type.toUpperCase());
+
+            // train
+            SolutionModel model = svm.trainModel(config, useGridSearch);
+
+            // test
+            System.out.println("MSE of the specific model: " + svm.testModel(model));
+        }
+
+
+        Model.runSVMModel(train, test, true);
 
     }
 }
