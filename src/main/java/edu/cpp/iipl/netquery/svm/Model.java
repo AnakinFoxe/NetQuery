@@ -22,7 +22,9 @@ import org.nd4j.linalg.dataset.DataSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * Created by xing on 5/30/16.
@@ -84,19 +86,27 @@ public class Model {
                 vector.values[v] = (float)row.getDouble(v);
             }
 
-            // get prediction
-            if (model instanceof ContinuousModel)
-                predicts[i] = ((ContinuousModel)model).predictValue(vector);
-            else
-                predicts[i] = (Byte)((DiscreteModel)model).predictLabel(vector);
-
-            // get label
-            labels[i] = TEST.getLabels().getDouble(i);
+            // get prediction and label
+            if (model instanceof ContinuousModel) {
+                predicts[i] = ((ContinuousModel) model).predictValue(vector);
+                labels[i] = TEST.getLabels().getDouble(i);
+            } else {
+                predicts[i] = (Byte) ((DiscreteModel) model).predictLabel(vector);
+                labels[i] = DataLoader.roundUp(TEST.getLabels().getDouble(i));
+            }
         }
 
         double mse = Metric.meanSquaredError(labels, predicts);
 
         LOG.warn("Mean Squared Error: {}", mse);
+
+        if (model instanceof DiscreteModel) {
+            double kappa = evalResult(labels, predicts);
+
+            LOG.warn("Kappa: {}", kappa);
+
+            return kappa;
+        }
 
         return mse;
     }
@@ -290,6 +300,20 @@ public class Model {
         return problem;
     }
 
+
+    private double evalResult(double[] labels, double[] predicts) {
+
+
+        List<Integer> intLabels = new ArrayList<>();
+        List<Integer> intPredicts = new ArrayList<>();
+
+        for (int i = 0; i < labels.length; ++i) {
+            intLabels.add(DataLoader.roundUp(labels[i]));
+            intPredicts.add(DataLoader.roundUp(predicts[i]));
+        }
+
+        return Metric.quadraticWeightedKappa(intLabels, intPredicts);
+    }
 
 
 }

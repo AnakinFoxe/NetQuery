@@ -99,7 +99,6 @@ public class DataLoader {
             allData.get(idx).setVariance(variance);
             ++idx;
 
-
             ++cnt[roundUp(relevance) - 1];
         }
 

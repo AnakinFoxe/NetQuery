@@ -119,6 +119,7 @@ public class Routine {
 
     }
 
+    // for single model NN
     private static NetworkConfig buildNetworkConfigFromFile(String path)
             throws IOException {
         // read config file
@@ -153,6 +154,29 @@ public class Routine {
         nc.afInOutput = settings.get(idx).equals("null") ? null : settings.get(idx);
 
         return nc;
+    }
+
+    // for single model SVM
+    private static SVMConfig buildSVMConfigFromFile(String path)
+            throws IOException {
+        // read config file
+        BufferedReader br = new BufferedReader(new FileReader(path));
+        List<String> settings = new ArrayList<>();
+        String line;
+        while ((line = br.readLine()) != null) {
+            String[] items = line.trim().split("=");
+            settings.add(items[1]);
+        }
+        br.close();
+
+        // build network config
+        int idx = 0;
+        SVMConfig config = new SVMConfig();
+        config.kernelType[0] = SVMConfig.KernelType.valueOf(settings.get(idx++));
+        config.gamma[0] = Float.parseFloat(settings.get(idx++));
+        config.C[0] = Float.parseFloat(settings.get(idx));
+
+        return config;
     }
 
     public static void prepareTextForWord2Vec(List<ProcessedData> allData)
@@ -241,7 +265,7 @@ public class Routine {
         }
 
         String algo = args[0];
-        String type = args[1];
+        String type = args[1].toLowerCase();
         boolean useGridSearch = Boolean.parseBoolean(args[2]);
         String path = useGridSearch ? "" : args[3];
         int iteration = 0;
@@ -259,19 +283,19 @@ public class Routine {
                 algo, type, useGridSearch, path, iteration);
 
         // prepare training and testing data
-        File trainFile = new File(Setting.DATASET_TRAIN);
-        File testFile = new File(Setting.DATASET_TEST);
-
-        if (trainFile.exists() && testFile.exists()) {
-            LOG.warn("loading already processed training & testing dataset...");
-            train.load(trainFile);
-            test.load(testFile);
-        } else
-            prepareDataSet();
+//        File trainFile = new File(Setting.DATASET_TRAIN);
+//        File testFile = new File(Setting.DATASET_TEST);
+//
+//        if (trainFile.exists() && testFile.exists()) {
+//            LOG.warn("loading already processed training & testing dataset...");
+//            train.load(trainFile);
+//            test.load(testFile);
+//        } else
+        prepareDataSet();
 
         // save data
-        train.save(new File(Setting.DATASET_TRAIN));
-        test.save(new File(Setting.DATASET_TEST));
+//        train.save(new File(Setting.DATASET_TRAIN));
+//        test.save(new File(Setting.DATASET_TEST));
 
         // train and test model according to arguments
         // neural network
@@ -307,9 +331,12 @@ public class Routine {
             Model svm = new Model(train, test);
 
             // prepare config
-            SVMConfig config = new SVMConfig();
+            SVMConfig config;
+            if (useGridSearch)
+                config = new SVMConfig();
+            else
+                config = buildSVMConfigFromFile(path);
 
-            type = type.toLowerCase();
             if (type.equals("epsilon_svr") || type.equals("nu_svr"))
                 config.numOfClass = 0;
             else if (type.equals("c_svc") || type.equals("nu_svc") || type.equals("one_class"))
@@ -326,7 +353,7 @@ public class Routine {
             SolutionModel model = svm.trainModel(config, useGridSearch);
 
             // test
-            System.out.println("MSE of the specific model: " + svm.testModel(model));
+            svm.testModel(model);
         }
 
     }
