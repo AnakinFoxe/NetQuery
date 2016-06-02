@@ -282,20 +282,8 @@ public class Routine {
         LOG.warn("ALGO: {}, TYPE: {}, GRID: {}, PATH: {}, ITER: {}",
                 algo, type, useGridSearch, path, iteration);
 
-        // prepare training and testing data
-//        File trainFile = new File(Setting.DATASET_TRAIN);
-//        File testFile = new File(Setting.DATASET_TEST);
-//
-//        if (trainFile.exists() && testFile.exists()) {
-//            LOG.warn("loading already processed training & testing dataset...");
-//            train.load(trainFile);
-//            test.load(testFile);
-//        } else
+        // prepare data
         prepareDataSet();
-
-        // save data
-//        train.save(new File(Setting.DATASET_TRAIN));
-//        test.save(new File(Setting.DATASET_TEST));
 
         // train and test model according to arguments
         // neural network

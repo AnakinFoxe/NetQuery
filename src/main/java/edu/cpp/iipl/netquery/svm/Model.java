@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by xing on 5/30/16.
@@ -86,7 +87,7 @@ public class Model {
                 vector.values[v] = (float)row.getDouble(v);
             }
 
-            // get prediction and label
+            // get prediction
             if (model instanceof ContinuousModel) {
                 predicts[i] = ((ContinuousModel) model).predictValue(vector);
                 labels[i] = TEST.getLabels().getDouble(i);
@@ -308,8 +309,8 @@ public class Model {
         List<Integer> intPredicts = new ArrayList<>();
 
         for (int i = 0; i < labels.length; ++i) {
-            intLabels.add(DataLoader.roundUp(labels[i]));
-            intPredicts.add(DataLoader.roundUp(predicts[i]));
+            intLabels.add((int)labels[i]);
+            intPredicts.add((int)predicts[i]);
         }
 
         return Metric.quadraticWeightedKappa(intLabels, intPredicts);
