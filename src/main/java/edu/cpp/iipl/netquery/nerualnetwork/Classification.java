@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * Created by xing on 4/23/16.
  */
-public class Classification extends Model {
+public class Classification extends NeuralNetwork {
 
     private static final Logger LOG = LoggerFactory.getLogger(Classification.class);
 

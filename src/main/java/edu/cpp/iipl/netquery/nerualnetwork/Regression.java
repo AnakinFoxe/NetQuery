@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by xing on 4/23/16.
  */
-public class Regression extends Model {
+public class Regression extends NeuralNetwork {
 
     private static final Logger LOG = LoggerFactory.getLogger(Regression.class);
 

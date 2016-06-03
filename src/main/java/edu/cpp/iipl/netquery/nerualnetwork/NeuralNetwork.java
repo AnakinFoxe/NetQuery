@@ -11,14 +11,14 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by xing on 5/1/16.
  */
-public class Model {
+public class NeuralNetwork {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Model.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NeuralNetwork.class);
 
     protected final DataSet TRAIN;
     protected final DataSet TEST;
 
-    public Model(boolean enforceNumStab, final DataSet train, final DataSet test) {
+    public NeuralNetwork(boolean enforceNumStab, final DataSet train, final DataSet test) {
 
         Nd4j.ENFORCE_NUMERICAL_STABILITY = enforceNumStab;
 

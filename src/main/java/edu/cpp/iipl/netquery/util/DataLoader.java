@@ -2,12 +2,16 @@ package edu.cpp.iipl.netquery.util;
 
 import edu.cpp.iipl.netquery.Setting;
 import edu.cpp.iipl.netquery.model.Data;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.dataset.DataSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SparseInstance;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,6 +111,55 @@ public class DataLoader {
         LOG.info("Data set loading accomplished.");
 
     }
+
+
+    public static Instances convert2Arff(DataSet data, String nameOfDataSet, String path) {
+        int numOfFeature = data.numInputs();
+        int numOfSample = data.numExamples();
+
+        // define feature and class prototype
+        ArrayList<Attribute> prototype = new ArrayList<>();
+        for (int i = 0; i < numOfFeature; ++i)
+            prototype.add(new Attribute("attr" + i));   // features
+        prototype.add(new Attribute("label"));          // class (label)
+
+        // create empty data set
+        Instances dataSet = new Instances(nameOfDataSet, prototype, numOfSample);
+
+        // set last one as class (label)
+        dataSet.setClassIndex(numOfFeature);
+
+        // convert data from DataSet to ARFF format
+        INDArray featureMatrix = data.getFeatureMatrix();
+        INDArray labels = data.getLabels();
+        for (int i = 0; i < numOfSample; ++i) {
+            Instance sample = new SparseInstance(numOfFeature + 1); // include label
+
+            // set feature vale
+            for (int j = 0; j < numOfFeature; ++j) {
+                double feat = featureMatrix.getDouble(i, j);
+                sample.setValue(prototype.get(j), feat);
+            }
+
+            // set label value
+            sample.setValue(prototype.get(numOfFeature), DataLoader.roundUp(labels.getDouble(i)));
+
+            // add to data set
+            dataSet.add(sample);
+        }
+
+
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(path));
+            bw.write(dataSet.toString());
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return dataSet;
+    }
+
 
     public static int roundUp(double num) {
         if (num < 1.5)

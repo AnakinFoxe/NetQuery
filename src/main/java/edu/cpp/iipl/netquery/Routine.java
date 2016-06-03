@@ -7,7 +7,8 @@ import edu.cpp.iipl.netquery.nerualnetwork.Classification;
 import edu.cpp.iipl.netquery.nerualnetwork.NetworkConfig;
 import edu.cpp.iipl.netquery.nerualnetwork.ParameterSearch;
 import edu.cpp.iipl.netquery.nerualnetwork.Regression;
-import edu.cpp.iipl.netquery.svm.Model;
+import edu.cpp.iipl.netquery.rf.RandomForest;
+import edu.cpp.iipl.netquery.svm.SVM;
 import edu.cpp.iipl.netquery.svm.SVMConfig;
 import edu.cpp.iipl.netquery.util.DataLoader;
 import edu.cpp.iipl.netquery.util.FeatureExtractor;
@@ -246,10 +247,14 @@ public class Routine {
                 Setting.SAMPLE_SIZE,
                 Setting.FEATURE_NUM,
                 Setting.SPLIT_RATIO);
+
+        // convert data set to ARFF format
+        DataLoader.convert2Arff(train, "train", Setting.DATASET_TRAIN_ARFF);
+        DataLoader.convert2Arff(test, "test", Setting.DATASET_TEST_ARFF);
     }
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         if (args == null || (args.length < 3 || args.length > 5)) {
             LOG.error("Format: [algo] [type] [grid] [file] [iter]");
             LOG.error("     [algo]: nn, svm");
@@ -316,7 +321,7 @@ public class Routine {
 
             }
         } else if (algo.equals("svm")) {
-            Model svm = new Model(train, test);
+            SVM svm = new SVM(train, test);
 
             // prepare config
             SVMConfig config;
@@ -342,6 +347,13 @@ public class Routine {
 
             // test
             svm.testModel(model);
+        } else if (algo.equals("rf")) {
+//            RandomForest rf = new RandomForest(train, test);
+            RandomForest rf = new RandomForest(
+                    Setting.DATASET_TRAIN_ARFF,
+                    Setting.DATASET_TEST_ARFF);
+
+            rf.run();
         }
 
     }

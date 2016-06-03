@@ -25,20 +25,19 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by xing on 5/30/16.
  */
-public class Model {
+public class SVM {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Model.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SVM.class);
 
 
     private final DataSet TRAIN;
     private final DataSet TEST;
 
-    public Model(DataSet train, DataSet test) {
+    public SVM(DataSet train, DataSet test) {
         this.TRAIN = train;
         this.TEST = test;
     }
@@ -57,7 +56,7 @@ public class Model {
         MutableSvmProblem problem = getProblem(config.numOfClass);
 
         // instantiate svm object according to type
-        SVM svm = getSVM(config.svmType);
+        edu.berkeley.compbio.jlibsvm.SVM svm = getSVM(config.svmType);
 
         if (svm instanceof BinaryClassificationSVM && config.numOfClass > 2) {
             svm = new MultiClassificationSVM((BinaryClassificationSVM) svm);
@@ -69,7 +68,7 @@ public class Model {
 
     public double testModel(SolutionModel model) {
         if (model == null) {
-            LOG.error("Model is invalid");
+            LOG.error("NeuralNetwork is invalid");
             return Double.NaN;
         }
 
@@ -203,7 +202,7 @@ public class Model {
     }
 
 
-    private SVM getSVM(SVMConfig.SVMType type) {
+    private edu.berkeley.compbio.jlibsvm.SVM getSVM(SVMConfig.SVMType type) {
         switch (type) {
             case C_SVC:
                 return new C_SVC();
