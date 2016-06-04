@@ -10,6 +10,7 @@ import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
+import weka.core.converters.ArffSaver;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -117,14 +118,24 @@ public class DataLoader {
         int numOfFeature = data.numInputs();
         int numOfSample = data.numExamples();
 
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("@RELATION ").append(nameOfDataSet).append("\n\n");
+
         // define feature and class prototype
         ArrayList<Attribute> prototype = new ArrayList<>();
-        for (int i = 0; i < numOfFeature; ++i)
+        for (int i = 0; i < numOfFeature; ++i) {
             prototype.add(new Attribute("attr" + i));   // features
+
+            // TODO: numeric only for now
+            sb.append("@ATTRIBUTE ").append("attr").append(i).append(" NUMERIC\n");
+        }
         prototype.add(new Attribute("label"));          // class (label)
+        sb.append("@ATTRIBUTE label NUMERIC\n\n");
 
         // create empty data set
         Instances dataSet = new Instances(nameOfDataSet, prototype, numOfSample);
+        sb.append("@DATA\n");
 
         // set last one as class (label)
         dataSet.setClassIndex(numOfFeature);
@@ -139,10 +150,15 @@ public class DataLoader {
             for (int j = 0; j < numOfFeature; ++j) {
                 double feat = featureMatrix.getDouble(i, j);
                 sample.setValue(prototype.get(j), feat);
+
+                sb.append(feat).append(",");
             }
 
             // set label value
-            sample.setValue(prototype.get(numOfFeature), DataLoader.roundUp(labels.getDouble(i)));
+            int label = DataLoader.roundUp(labels.getDouble(i));
+            sample.setValue(prototype.get(numOfFeature), label);
+
+            sb.append(label).append("\n");
 
             // add to data set
             dataSet.add(sample);
@@ -150,9 +166,14 @@ public class DataLoader {
 
 
         try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(path));
-            bw.write(dataSet.toString());
-            bw.close();
+            ArffSaver saver = new ArffSaver();
+            saver.setInstances(dataSet);
+            saver.setFile(new File(path));
+            saver.writeBatch();
+
+//            BufferedWriter bw = new BufferedWriter(new FileWriter(path));
+//            bw.write(sb.toString());
+//            bw.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -86,6 +86,13 @@
             <version>3.8.0</version>
         </dependency>
 
+        <!-- JSAT -->
+        <dependency>
+            <groupId>com.edwardraff</groupId>
+            <artifactId>JSAT</artifactId>
+            <version>0.0.5</version>
+        </dependency>
+
     </dependencies>
 
 </project>

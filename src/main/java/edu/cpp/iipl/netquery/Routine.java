@@ -354,6 +354,9 @@ public class Routine {
                     Setting.DATASET_TEST_ARFF);
 
             rf.run();
+
+//            RandomForest rf = new RandomForest();
+//            rf.runJSAT();
         }
 
     }
