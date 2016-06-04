@@ -6,11 +6,6 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.SparseInstance;
-import weka.core.converters.ArffSaver;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -114,7 +109,7 @@ public class DataLoader {
     }
 
 
-    public static Instances convert2Arff(DataSet data, String nameOfDataSet, String path) {
+    public static void convert2Arff(DataSet data, String nameOfDataSet, String path) {
         int numOfFeature = data.numInputs();
         int numOfSample = data.numExamples();
 
@@ -122,63 +117,40 @@ public class DataLoader {
 
         sb.append("@RELATION ").append(nameOfDataSet).append("\n\n");
 
-        // define feature and class prototype
-        ArrayList<Attribute> prototype = new ArrayList<>();
+        // define feature and class attributes
         for (int i = 0; i < numOfFeature; ++i) {
-            prototype.add(new Attribute("attr" + i));   // features
-
             // TODO: numeric only for now
             sb.append("@ATTRIBUTE ").append("attr").append(i).append(" NUMERIC\n");
         }
-        prototype.add(new Attribute("label"));          // class (label)
-        sb.append("@ATTRIBUTE label NUMERIC\n\n");
+        sb.append("@ATTRIBUTE label {1,2,3,4}\n\n");
 
         // create empty data set
-        Instances dataSet = new Instances(nameOfDataSet, prototype, numOfSample);
         sb.append("@DATA\n");
 
-        // set last one as class (label)
-        dataSet.setClassIndex(numOfFeature);
-
-        // convert data from DataSet to ARFF format
+        // fill data
         INDArray featureMatrix = data.getFeatureMatrix();
         INDArray labels = data.getLabels();
         for (int i = 0; i < numOfSample; ++i) {
-            Instance sample = new SparseInstance(numOfFeature + 1); // include label
-
             // set feature vale
             for (int j = 0; j < numOfFeature; ++j) {
                 double feat = featureMatrix.getDouble(i, j);
-                sample.setValue(prototype.get(j), feat);
-
                 sb.append(feat).append(",");
             }
 
             // set label value
             int label = DataLoader.roundUp(labels.getDouble(i));
-            sample.setValue(prototype.get(numOfFeature), label);
-
             sb.append(label).append("\n");
-
-            // add to data set
-            dataSet.add(sample);
         }
 
 
         try {
-            ArffSaver saver = new ArffSaver();
-            saver.setInstances(dataSet);
-            saver.setFile(new File(path));
-            saver.writeBatch();
-
-//            BufferedWriter bw = new BufferedWriter(new FileWriter(path));
-//            bw.write(sb.toString());
-//            bw.close();
+            BufferedWriter bw = new BufferedWriter(new FileWriter(path));
+            bw.write(sb.toString());
+            bw.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return dataSet;
     }
 
 

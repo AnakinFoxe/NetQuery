@@ -348,15 +348,11 @@ public class Routine {
             // test
             svm.testModel(model);
         } else if (algo.equals("rf")) {
-//            RandomForest rf = new RandomForest(train, test);
             RandomForest rf = new RandomForest(
                     Setting.DATASET_TRAIN_ARFF,
                     Setting.DATASET_TEST_ARFF);
 
             rf.run();
-
-//            RandomForest rf = new RandomForest();
-//            rf.runJSAT();
         }
 
     }
