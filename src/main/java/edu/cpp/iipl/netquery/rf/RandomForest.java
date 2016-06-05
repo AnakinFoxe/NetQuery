@@ -33,18 +33,22 @@ public class RandomForest {
 
 
     public void run() {
+        LOG.warn("create Random Forest classifier...");
         jsat.classifiers.trees.RandomForest rf =
                 new jsat.classifiers.trees.RandomForest();
 
         // set parameters
+        LOG.warn("set up parameters...");
         rf.setFeatureSamples(TRAIN.getNumFeatures()/2);
         rf.setUseOutOfBagError(true);
         rf.setUseOutOfBagImportance(true);
 
         // train
+        LOG.warn("train classifier...");
         rf.trainC(TRAIN);
 
         // test
+        LOG.warn("generate test results...");
         double[] predicts = new double[TEST.getSampleSize()];
         double[] labels = new double[TEST.getSampleSize()];
         for (int i = 0; i < TEST.getSampleSize(); ++i) {

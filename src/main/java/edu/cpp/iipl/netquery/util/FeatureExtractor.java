@@ -180,8 +180,8 @@ public class FeatureExtractor {
         for (ProcessedData data : allData) {
             // update dictionary for tf-idf computation
             dict.addAll(data.getUnigramQuery());
-            dict.addAll(data.getUnigramTitle());
-            dict.addAll(data.getUnigramDesc());
+//            dict.addAll(data.getUnigramTitle());
+//            dict.addAll(data.getUnigramDesc());
 
             // prepare documents
             titles.add(data.getUnigramTitle());
@@ -203,7 +203,7 @@ public class FeatureExtractor {
         }
 
         List<String> query = data.getUnigramQuery();
-        List<String> title = data.getUnigramTitle();
+//        List<String> title = data.getUnigramTitle();
 
         // cosine similarity of query vs title
         double cosineQnT = tfIdfTitle.cosineSimilarity(docId, query);
@@ -212,12 +212,12 @@ public class FeatureExtractor {
         double cosineQnD = tfIdfDescription.cosineSimilarity(docId, query);
 
         // cosine similarity of title vs description
-        double cosineTnD = tfIdfDescription.cosineSimilarity(docId, title);
+//        double cosineTnD = tfIdfDescription.cosineSimilarity(docId, title);
 
 
         feature.add(cosineQnT);
         feature.add(cosineQnD);
-        feature.add(cosineTnD);
+//        feature.add(cosineTnD);
     }
 
 

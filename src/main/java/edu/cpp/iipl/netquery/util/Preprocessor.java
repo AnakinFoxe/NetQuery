@@ -104,7 +104,7 @@ public class Preprocessor {
             if (token.replaceAll("[^a-zA-Z0-9]", "").length() == 0)
                 continue;
 
-            proced.add(token);
+            proced.add(token.replaceAll("[^a-zA-Z0-9]", ""));
         }
 
         return proced;
